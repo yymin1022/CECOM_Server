@@ -1,10 +1,19 @@
-from flask import Flask, send_file
+from flask import Flask, send_file, request
+from firebase_admin import firestore
+import firebase_admin
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
+cred = firebase_admin.credentials.Certificate("cecom-server-firebase-adminsdk-1mf58-2dcbd52a85.json")
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+@app.route('/', methods=["GET"])
+def main():
+    result = db.collection(u'connection_ban').document(u'IP').get().to_dict()
+    print(result)
+    ipAddr = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    return ipAddr
 
 #파일 목록에서 다운로드 함수 호출시 해당 파일의 경로 지정
 filename = "TODO.txt"
